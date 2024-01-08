@@ -7,6 +7,6 @@ Code repository for St. Ignatius High School's Robotics Team. See [Documentation
 
 [WPILib Download](https://github.com/wpilibsuite/allwpilib/releases/download/v2023.4.3/WPILib_Windows-2023.4.3.iso) Library containing FRC functions subroutines.
 
-[Timed Robot Documentation](https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/TimedRobot.html) Documentation for the TimedRobot subclass.
+[Command Robot Original Files](https://github.com/wpilibsuite/allwpilib/tree/main/wpilibjExamples/src/main/java/edu/wpi/first/wpilibj/templates/commandbased) From the WPILib GitHub.
 
-[Timed Robot Original File](https://github.com/wpilibsuite/allwpilib/blob/main/wpilibj/src/main/java/edu/wpi/first/wpilibj/TimedRobot.java) From the WPILib GitHub.
+[Timed Robot Documentation](https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/TimedRobot.html) Documentation for the TimedRobot subclass.
