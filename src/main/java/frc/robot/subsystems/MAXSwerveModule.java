@@ -10,15 +10,25 @@ import edu.wpi.first.wpilibj.Encoder;
 import frc.robot.Constants.ModuleConstants;
 import edu.wpi.first.wpilibj.motorcontrol.Spark;
 
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkLowLevel.MotorType;
+import com.revrobotics.SparkPIDController;
+import com.revrobotics.AbsoluteEncoder;
+import com.revrobotics.RelativeEncoder;
+
 // Constructor for creating modules that represent each wheel
-public class SwerveModule {
+public class MAXSwerveModule {
     // Variables for channels of the wheel. These are used in the constructor of this class.
-    private final Spark m_driveMotor;
-    private final Spark m_turningMotor;
+    private final CANSparkMax m_drivingSparkMax;
+    private final CANSparkMax m_turningSparkMax;
   
-    private final Encoder m_driveEncoder;
-    private final Encoder m_turningEncoder;
+    private final RelativeEncoder m_drivingEncoder;
+    private final AbsoluteEncoder m_turningEncoder;
   
+    private final SparkPIDController m_drivePIDController;
+    private final SparkPIDController m_turningPIDController; 
+    
+    /* Old code from WPI example swerve implementation
     private final PIDController m_drivePIDController =
         new PIDController(ModuleConstants.kPModuleDriveController, 0, 0);
   
@@ -31,6 +41,7 @@ public class SwerveModule {
             new TrapezoidProfile.Constraints(
                 ModuleConstants.kMaxModuleAngularSpeedRadiansPerSecond,
                 ModuleConstants.kMaxModuleAngularAccelerationRadiansPerSecondSquared));
+    */            
   
     /**
      * Constructs a SwerveModule.
@@ -42,39 +53,13 @@ public class SwerveModule {
      * @param driveEncoderReversed Whether the drive encoder is reversed.
      * @param turningEncoderReversed Whether the turning encoder is reversed.
      */
-    public SwerveModule(
-        int driveMotorChannel,
-        int turningMotorChannel,
-        int[] driveEncoderChannels,
-        int[] turningEncoderChannels,
-        boolean driveEncoderReversed,
-        boolean turningEncoderReversed) {
-      m_driveMotor = new Spark(driveMotorChannel);
-      m_turningMotor = new Spark(turningMotorChannel);
-  
-      m_driveEncoder = new Encoder(driveEncoderChannels[0], driveEncoderChannels[1]);
-  
-      m_turningEncoder = new Encoder(turningEncoderChannels[0], turningEncoderChannels[1]);
-  
-      // Set the distance per pulse for the drive encoder. We can simply use the
-      // distance traveled for one rotation of the wheel divided by the encoder
-      // resolution.
-      m_driveEncoder.setDistancePerPulse(ModuleConstants.kDriveEncoderDistancePerPulse);
-  
-      // Set whether drive encoder should be reversed or not
-      m_driveEncoder.setReverseDirection(driveEncoderReversed);
-  
-      // Set the distance (in this case, angle) in radians per pulse for the turning encoder.
-      // This is the the angle through an entire rotation (2 * pi) divided by the
-      // encoder resolution.
-      m_turningEncoder.setDistancePerPulse(ModuleConstants.kTurningEncoderDistancePerPulse);
-  
-      // Set whether turning encoder should be reversed or not
-      m_turningEncoder.setReverseDirection(turningEncoderReversed);
-  
-      // Limit the PID Controller's input range between -pi and pi and set the input
-      // to be continuous.
-      m_turningPIDController.enableContinuousInput(-Math.PI, Math.PI);
+    public MAXSwerveModule(int driveCANId, int turnCANId) {
+      m_drivingSparkMax = new CANSparkMax(driveCANId, MotorType.kBrushless);
+      m_turningSparkMax = new CANSparkMax(turnCANId, MotorType.kBrushless); //idk what the motor type is
+
+      m_drivingSparkMax.restoreFactoryDefaults();
+      m_turningSparkMax.restoreFactoryDefaults();      
+
     }
   
     /**
@@ -83,8 +68,10 @@ public class SwerveModule {
      * @return The current state of the module.
      */
     public SwerveModuleState getState() {
-      return new SwerveModuleState(
-          m_driveEncoder.getRate(), new Rotation2d(m_turningEncoder.getDistance()));
+    // Apply chassis angular offset to the encoder position to get the position
+    // relative to the chassis.
+    return new SwerveModuleState(m_drivingEncoder.getVelocity(),
+        new Rotation2d(m_turningEncoder.getPosition()));
     }
   
     /**
@@ -94,7 +81,8 @@ public class SwerveModule {
      */
     public SwerveModulePosition getPosition() {
       return new SwerveModulePosition(
-          m_driveEncoder.getDistance(), new Rotation2d(m_turningEncoder.getDistance()));
+          m_drivingEncoder.getPosition(),
+            new Rotation2d(m_turningEncoder.getPosition()));
     }
   
     /**

@@ -15,8 +15,8 @@ public class DriveSubsystem extends SubsystemBase {
   public DriveSubsystem() {}
   
   // Robot swerve modules
-  private final SwerveModule m_frontLeft =
-      new SwerveModule(
+  private final MAXSwerveModule m_frontLeft =
+      new MAXSwerveModule(
           DriveConstants.kFrontLeftDriveMotorPort,
           DriveConstants.kFrontLeftTurningMotorPort,
           DriveConstants.kFrontLeftDriveEncoderPorts,
@@ -24,8 +24,8 @@ public class DriveSubsystem extends SubsystemBase {
           DriveConstants.kFrontLeftDriveEncoderReversed,
           DriveConstants.kFrontLeftTurningEncoderReversed);
 
-  private final SwerveModule m_rearLeft =
-      new SwerveModule(
+  private final MAXSwerveModule m_rearLeft =
+      new MAXSwerveModule(
           DriveConstants.kRearLeftDriveMotorPort,
           DriveConstants.kRearLeftTurningMotorPort,
           DriveConstants.kRearLeftDriveEncoderPorts,
@@ -33,8 +33,8 @@ public class DriveSubsystem extends SubsystemBase {
           DriveConstants.kRearLeftDriveEncoderReversed,
           DriveConstants.kRearLeftTurningEncoderReversed);
 
-  private final SwerveModule m_frontRight =
-      new SwerveModule(
+  private final MAXSwerveModule m_frontRight =
+      new MAXSwerveModule(
           DriveConstants.kFrontRightDriveMotorPort,
           DriveConstants.kFrontRightTurningMotorPort,
           DriveConstants.kFrontRightDriveEncoderPorts,
@@ -42,8 +42,8 @@ public class DriveSubsystem extends SubsystemBase {
           DriveConstants.kFrontRightDriveEncoderReversed,
           DriveConstants.kFrontRightTurningEncoderReversed);
 
-  private final SwerveModule m_rearRight =
-      new SwerveModule(
+  private final MAXSwerveModule m_rearRight =
+      new MAXSwerveModule(
           DriveConstants.kRearRightDriveMotorPort,
           DriveConstants.kRearRightTurningMotorPort,
           DriveConstants.kRearRightDriveEncoderPorts,
