@@ -58,7 +58,38 @@ public class MAXSwerveModule {
       m_turningSparkMax = new CANSparkMax(turnCANId, MotorType.kBrushless); //idk what the motor type is
 
       m_drivingSparkMax.restoreFactoryDefaults();
-      m_turningSparkMax.restoreFactoryDefaults();      
+      m_turningSparkMax.restoreFactoryDefaults();    
+    // Setup encoders and PID controllers for the driving and turning SPARKS MAX.
+      m_drivingEncoder = m_drivingSparkMax.getEncoder();
+      m_turningEncoder = m_turningSparkMax.getAbsoluteEncoder(Type.kDutyCycle);
+      m_drivingPIDController = m_drivingSparkMax.getPIDController();
+      m_turningPIDController = m_turningSparkMax.getPIDController();
+      m_drivingPIDController.setFeedbackDevice(m_drivingEncoder);
+      m_turningPIDController.setFeedbackDevice(m_turningEncoder);
+
+      // Apply position and velocity conversion factors for the driving encoder. The
+      // native units for position and velocity are rotations and RPM, respectively,
+      // but we want meters and meters per second to use with WPILib's swerve APIs.
+      m_drivingEncoder.setPositionConversionFactor(ModuleConstants.kDrivingEncoderPositionFactor);
+      m_drivingEncoder.setVelocityConversionFactor(ModuleConstants.kDrivingEncoderVelocityFactor);
+
+      // Apply position and velocity conversion factors for the turning encoder. We
+      // want these in radians and radians per second to use with WPILib's swerve
+      // APIs.
+      m_turningEncoder.setPositionConversionFactor(ModuleConstants.kTurningEncoderPositionFactor);
+      m_turningEncoder.setVelocityConversionFactor(ModuleConstants.kTurningEncoderVelocityFactor);
+
+      // Invert the turning encoder, since the output shaft rotates in the opposite direction of
+      // the steering motor in the MAXSwerve Module.
+      m_turningEncoder.setInverted(ModuleConstants.kTurningEncoderInverted);
+
+      // Enable PID wrap around for the turning motor. This will allow the PID
+      // controller to go through 0 to get to the setpoint i.e. going from 350 degrees
+      // to 10 degrees will go through 0 rather than the other direction which is a
+      // longer route.
+      m_turningPIDController.setPositionPIDWrappingEnabled(true);
+      m_turningPIDController.setPositionPIDWrappingMinInput(ModuleConstants.kTurningEncoderPositionPIDMinInput);
+      m_turningPIDController.setPositionPIDWrappingMaxInput(ModuleConstants.kTurningEncoderPositionPIDMaxInput);
 
     }
   

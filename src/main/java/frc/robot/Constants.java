@@ -25,15 +25,15 @@ public final class Constants {
   // Constants used by the DriveSubsystem Subsystem.
   // These need to be determined for our particular robot.
   public static final class DriveConstants {
-    public static final int kFrontLeftDriveMotorPort = 0;
-    public static final int kRearLeftDriveMotorPort = 2;
-    public static final int kFrontRightDriveMotorPort = 4;
-    public static final int kRearRightDriveMotorPort = 6;
+    public static final int kFrontLeftDrivingCANId = 0;
+    public static final int kRearLeftDrivingCANId = 2;
+    public static final int kFrontRightDrivingCANId = 4;
+    public static final int kRearRightDrivingCANId = 6;
 
-    public static final int kFrontLeftTurningMotorPort = 1;
-    public static final int kRearLeftTurningMotorPort = 3;
-    public static final int kFrontRightTurningMotorPort = 5;
-    public static final int kRearRightTurningMotorPort = 7;
+    public static final int kFrontLeftTurningCANId = 1;
+    public static final int kRearLeftTurningCANId = 3;
+    public static final int kFrontRightTurningCANId = 5;
+    public static final int kRearRightTurningCANId = 7;
 
     public static final int[] kFrontLeftTurningEncoderPorts = new int[] {0, 1};
     public static final int[] kRearLeftTurningEncoderPorts = new int[] {2, 3};

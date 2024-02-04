@@ -17,39 +17,23 @@ public class DriveSubsystem extends SubsystemBase {
   // Robot swerve modules
   private final MAXSwerveModule m_frontLeft =
       new MAXSwerveModule(
-          DriveConstants.kFrontLeftDriveMotorPort,
-          DriveConstants.kFrontLeftTurningMotorPort,
-          DriveConstants.kFrontLeftDriveEncoderPorts,
-          DriveConstants.kFrontLeftTurningEncoderPorts,
-          DriveConstants.kFrontLeftDriveEncoderReversed,
-          DriveConstants.kFrontLeftTurningEncoderReversed);
+          DriveConstants.kFrontLeftDrivingCANId,
+          DriveConstants.kFrontLeftTurningCANId);
 
   private final MAXSwerveModule m_rearLeft =
       new MAXSwerveModule(
-          DriveConstants.kRearLeftDriveMotorPort,
-          DriveConstants.kRearLeftTurningMotorPort,
-          DriveConstants.kRearLeftDriveEncoderPorts,
-          DriveConstants.kRearLeftTurningEncoderPorts,
-          DriveConstants.kRearLeftDriveEncoderReversed,
-          DriveConstants.kRearLeftTurningEncoderReversed);
+          DriveConstants.kRearLeftDrivingCANId,
+          DriveConstants.kRearLeftTurningCANId);
 
   private final MAXSwerveModule m_frontRight =
       new MAXSwerveModule(
-          DriveConstants.kFrontRightDriveMotorPort,
-          DriveConstants.kFrontRightTurningMotorPort,
-          DriveConstants.kFrontRightDriveEncoderPorts,
-          DriveConstants.kFrontRightTurningEncoderPorts,
-          DriveConstants.kFrontRightDriveEncoderReversed,
-          DriveConstants.kFrontRightTurningEncoderReversed);
+          DriveConstants.kFrontRightDrivingCANId,
+          DriveConstants.kFrontRightTurningCANId);
 
   private final MAXSwerveModule m_rearRight =
       new MAXSwerveModule(
-          DriveConstants.kRearRightDriveMotorPort,
-          DriveConstants.kRearRightTurningMotorPort,
-          DriveConstants.kRearRightDriveEncoderPorts,
-          DriveConstants.kRearRightTurningEncoderPorts,
-          DriveConstants.kRearRightDriveEncoderReversed,
-          DriveConstants.kRearRightTurningEncoderReversed);
+          DriveConstants.kRearRightDrivingCANId,
+          DriveConstants.kRearRightTurningCANId);
 
   // The gyro sensor (idk what driver we're using)
   private final ADXRS450_Gyro m_gyro = new ADXRS450_Gyro();
