@@ -162,8 +162,6 @@ public class DriveSubsystem extends SubsystemBase {
       xSpeedCommanded = m_currentTranslationMag * Math.cos(m_currentTranslationDir);
       ySpeedCommanded = m_currentTranslationMag * Math.sin(m_currentTranslationDir);
       m_currentRotation = m_rotLimiter.calculate(rot);
-
-
     } else {
       xSpeedCommanded = xSpeed;
       ySpeedCommanded = ySpeed;
