@@ -28,6 +28,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.DriveConstants;
+import edu.wpi.first.wpilibj2.command.Command;
 
 public class SwerveSubsystem extends SubsystemBase {
     private final SwerveModule frontLeft = new SwerveModule( 
@@ -177,7 +178,22 @@ Pigeon2 P2gyro = new Pigeon2(20);  //Using CANID #20
     //         SwerveModuleState swervemodulebackRight2 = moduleStates[3];
 
     //    // swervemodulefrontLeft2.angle;
-
-     }
+    }
     
+    public void drive(double xSpeed, double ySpeed, double rot, boolean fieldRelative) {
+        var swerveModuleStates =
+            DriveConstants.kDriveKinematics.toSwerveModuleStates(
+                ChassisSpeeds.discretize(
+                    fieldRelative
+                    ? ChassisSpeeds.fromFieldRelativeSpeeds(
+                        xSpeed, ySpeed, rot, this.getRotation2d())
+                    : new ChassisSpeeds(xSpeed, ySpeed, rot),
+                0.02)); // 0.02 = once per scheduler call
+    SwerveDriveKinematics.desaturateWheelSpeeds(
+        swerveModuleStates, DriveConstants.kTeleDriveMaxSpeedMetersPerSecond);
+    frontLeft.setDesiredState(swerveModuleStates[0]);
+    frontRight.setDesiredState(swerveModuleStates[1]);
+    backLeft.setDesiredState(swerveModuleStates[2]);
+    backRight.setDesiredState(swerveModuleStates[3]);
+    }
 }
