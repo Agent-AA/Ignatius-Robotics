@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -22,6 +23,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DriveConstants;
+import edu.wpi.first.wpilibj2.command.Command;
 
 public class SwerveSubsystem extends SubsystemBase {
     private final SwerveModule frontLeft = new SwerveModule(
@@ -124,4 +126,20 @@ public class SwerveSubsystem extends SubsystemBase {
          frontLeft.setDesiredState(desiredStates[0]);
     }
     
+    public void drive(double xSpeed, double ySpeed, double rot, boolean fieldRelative) {
+        var swerveModuleStates =
+            DriveConstants.kDriveKinematics.toSwerveModuleStates(
+                ChassisSpeeds.discretize(
+                    fieldRelative
+                    ? ChassisSpeeds.fromFieldRelativeSpeeds(
+                        xSpeed, ySpeed, rot, this.getRotation2d())
+                    : new ChassisSpeeds(xSpeed, ySpeed, rot),
+                0.02)); // 0.02 = once per scheduler call
+    SwerveDriveKinematics.desaturateWheelSpeeds(
+        swerveModuleStates, DriveConstants.kTeleDriveMaxSpeedMetersPerSecond);
+    frontLeft.setDesiredState(swerveModuleStates[0]);
+    frontRight.setDesiredState(swerveModuleStates[1]);
+    backLeft.setDesiredState(swerveModuleStates[2]);
+    backRight.setDesiredState(swerveModuleStates[3]);
+    }
 }
