@@ -25,19 +25,27 @@ public class ExampleCommand extends Command {
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {}
+  public void initialize() {
+    System.out.println("ExampleCommand Initialized");
+  }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
-  public void execute() {}
+  public void execute() {
+
+    System.out.println("ExampleCommane Executed");
+  }
 
   // Called once the command ends or is interrupted.
   @Override
-  public void end(boolean interrupted) {}
+  public void end(boolean interrupted) {
+   System.out.println("ExampleCommane Ended");
+   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
+     System.out.println("ExampleCommane Finished");
     return false;
   }
 }
