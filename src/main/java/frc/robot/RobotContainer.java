@@ -6,6 +6,7 @@ package frc.robot;
 
 import java.util.List;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.XboxController;
 
 //   REPLACED BY ALTERNATE IMPORTS (SEE BELOW)
 //import edu.wpi.first.wpilibj.controller.PIDController;
@@ -39,6 +40,7 @@ import frc.robot.Constants.OIConstants;
 import frc.robot.commands.Autos;
 import frc.robot.commands.ExampleCommand;
 import frc.robot.commands.SwerveJoystickCmd;
+import frc.robot.subsystems.ShootingSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
 
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;  //FOR FLIGHT STICK
@@ -52,19 +54,21 @@ public class RobotContainer {
 
     private final SwerveSubsystem swerveSubsystem = new SwerveSubsystem();
 
-    private final Joystick driverJoytick = new Joystick(OIConstants.kDriverControllerPort); //0
-    //private final CommandJoystick commanddriverJoytick = new CommandJoystick(OIConstants.kDriverControllerPort);
+    private final XboxController driverController = new XboxController(OIConstants.kDriverControllerPort); //0
+    private final XboxController operatorController = new XboxController(Constants.OperatorConstants.kOperatorControllerPort); //1
 
+    private final ShootingSubsystem m_shootingSubsystem = ShootingSubsystem.getInstance();
+    //private final CommandJoystick commanddriverJoytick = new CommandJoystick(OIConstants.kDriverControllerPort);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Configure the trigger bindings
     swerveSubsystem.setDefaultCommand(new SwerveJoystickCmd(
                 swerveSubsystem, 
-                () -> -driverJoytick.getRawAxis(OIConstants.kDriverYAxis), //1
-                () -> driverJoytick.getRawAxis(OIConstants.kDriverXAxis),  //0
-                () -> driverJoytick.getRawAxis(OIConstants.kDriverRotAxis), //3
-                () -> !driverJoytick.getRawButton(OIConstants.kDriverFieldOrientedButtonIdx)));
+                () -> -driverController.getRawAxis(OIConstants.kDriverYAxis), //1
+                () -> driverController.getRawAxis(OIConstants.kDriverXAxis),  //0
+                () -> driverController.getRawAxis(OIConstants.kDriverRotAxis), //3
+                () -> !driverController.getRawButton(OIConstants.kDriverFieldOrientedButtonIdx)));
 
         configureButtonBindings();
   }
@@ -85,6 +89,17 @@ public class RobotContainer {
     //This is supposed to set the 2nd joystick button on the main joystick
     //new JoystickButton(driverJoytick, 2).whenPressed(() -> swerveSubsystem.zeroHeading()); //ORIGINAL
     //new JoystickButton(driverJoytick, 2).whileTrue(getAutonomousCommand())(() -> swerveSubsystem.zeroHeading());
+    
+    Trigger leftBumper = new JoystickButton(operatorController, XboxController.Button.kLeftBumper.value)
+        .onTrue(m_shootingSubsystem.togglePriming(1));
+
+    Trigger rightBumper = new JoystickButton(operatorController, XboxController.Button.kLeftBumper.value)
+        .onTrue(m_shootingSubsystem.togglePriming(0));
+
+     Trigger aButton = new JoystickButton(operatorController, XboxController.Button.kA.value)
+        .onTrue(m_shootingSubsystem.shoot())
+        .onFalse(m_shootingSubsystem.unShoot());
+
 }
 
   /**

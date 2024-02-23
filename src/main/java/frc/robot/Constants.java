@@ -21,6 +21,12 @@ import edu.wpi.first.units.Units;  //added for fix
 public final class Constants {
   public static class OperatorConstants {
     public static final int kDriverControllerPort = 0;
+    public static final int kOperatorControllerPort = 1;
+
+    public static final int kIntakePWM = 0;
+    public static final int kShooterPWM = 1;
+    public static final int kPrimer1PWM = 2;
+    public static final int kPrimer2PWM = 3;
   }
 
       public static final class ModuleConstants {
