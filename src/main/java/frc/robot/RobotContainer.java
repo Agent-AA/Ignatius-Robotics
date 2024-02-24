@@ -41,6 +41,7 @@ import frc.robot.commands.Autos;
 import frc.robot.commands.ExampleCommand;
 import frc.robot.commands.SwerveJoystickCmd;
 import frc.robot.subsystems.SwerveSubsystem;
+import frc.robot.subsystems.VisionSubsystem;
 
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;  //FOR FLIGHT STICK
 /**
@@ -52,6 +53,8 @@ import edu.wpi.first.wpilibj2.command.button.CommandJoystick;  //FOR FLIGHT STIC
 public class RobotContainer {
 
     private final SwerveSubsystem swerveSubsystem = new SwerveSubsystem();
+    private final VisionSubsystem visionSubsystem = new VisionSubsystem();
+
 
     private final Joystick driverJoytick = new Joystick(OIConstants.kDriverControllerPort); //0
     //private final CommandJoystick commanddriverJoytick = new CommandJoystick(OIConstants.kDriverControllerPort);
