@@ -60,18 +60,31 @@ public class RobotContainer {
     //private final CommandJoystick commanddriverJoytick = new CommandJoystick(OIConstants.kDriverControllerPort);
 
 
-  /** The container for the robot. Contains subsystems, OI devices, and commands. */
-  public RobotContainer() {
-    // Configure the trigger bindings
-    swerveSubsystem.setDefaultCommand(new SwerveJoystickCmd(
-                swerveSubsystem, 
-                () -> -driverJoytick.getRawAxis(OIConstants.kDriverYAxis), //1
-                () -> driverJoytick.getRawAxis(OIConstants.kDriverXAxis),  //0
-                () -> driverJoytick.getRawAxis(OIConstants.kDriverRotAxis), //3
-                () -> !driverJoytick.getRawButton(OIConstants.kDriverFieldOrientedButtonIdx)));
-
+    /** The container for the robot. Contains subsystems, OI devices, and commands. */
+    public RobotContainer() {
+        // Configure the trigger bindings
+        swerveSubsystem.setDefaultCommand(new SwerveJoystickCmd(
+            swerveSubsystem, 
+            () -> -driverJoytick.getRawAxis(OIConstants.kDriverYAxis), //1
+            () -> driverJoytick.getRawAxis(OIConstants.kDriverXAxis),  //0
+            () -> driverJoytick.getRawAxis(OIConstants.kDriverRotAxis), //3
+            () -> !driverJoytick.getRawButton(OIConstants.kDriverFieldOrientedButtonIdx)));
+        // Alternate code using drive() function that is more suitable for testing and vision
+        /*
+        new RunCommand(
+            () ->
+                m_robotDrive.drive(
+                    // The left stick controls translation of the robot.
+                    m_driverController.getLeftY() * DriveConstants.kTeleDriveMaxSpeedMetersPerSecond,
+                    m_driverController.getLeftX() * DriveConstants.kTeleDriveMaxSpeedMetersPerSecond,
+                    // Turning is controlled by the X axis of the right stick.
+                    m_driverController.getRightX()
+                        * DriveConstants.kTeleDriveMaxAngularSpeedRadiansPerSecond,
+                    false),
+            m_robotDrive));        
+        */
         configureButtonBindings();
-  }
+    }
 
   /**
    * Use this method to define your trigger->command mappings. Triggers can be created via the
@@ -82,68 +95,64 @@ public class RobotContainer {
    * PS4} controllers or {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
    * joysticks}.
    */
+    private void configureButtonBindings() {
+        //NEED ONE OF THE NEXT TWO LINES TO WORK
+        //This is supposed to set the 2nd joystick button on the main joystick
+        //new JoystickButton(driverJoytick, 2).whenPressed(() -> swerveSubsystem.zeroHeading()); //ORIGINAL
+        //new JoystickButton(driverJoytick, 2).whileTrue(getAutonomousCommand())(() -> swerveSubsystem.zeroHeading());
+    }
 
-
-  private void configureButtonBindings() {
-    //NEED ONE OF THE NEXT TWO LINES TO WORK
-    //This is supposed to set the 2nd joystick button on the main joystick
-    //new JoystickButton(driverJoytick, 2).whenPressed(() -> swerveSubsystem.zeroHeading()); //ORIGINAL
-    //new JoystickButton(driverJoytick, 2).whileTrue(getAutonomousCommand())(() -> swerveSubsystem.zeroHeading());
-}
-
-  /**
-   * Use this to pass the autonomous command to the main {@link Robot} class.
-   *
-   * @return the command to run in autonomous
-   */
-  public Command getAutonomousCommand() {
+   /**
+    * Use this to pass the autonomous command to the main {@link Robot} class.
+    *
+    * @return the command to run in autonomous
+    */
+    public Command getAutonomousCommand() {
+        return(new RunCommand(() -> swerveSubsystem.drive(0, 1, 0, false)));
         
-    return(new RunCommand(() -> swerveSubsystem.drive(0, 1, 0, false)));
+        //ADD BELOW CODE FOR AUTONOMOUS BEGIN HERE  
+        /* 
     
-    //ADD BELOW CODE FOR AUTONOMOUS BEGIN HERE  
-    /* 
-    
-    // 1. Create trajectory settings
+        // 1. Create trajectory settings
         TrajectoryConfig trajectoryConfig = new TrajectoryConfig(
-                AutoConstants.kMaxSpeedMetersPerSecond,
-                AutoConstants.kMaxAccelerationMetersPerSecondSquared)
-                        .setKinematics(DriveConstants.kDriveKinematics);
+            AutoConstants.kMaxSpeedMetersPerSecond,
+            AutoConstants.kMaxAccelerationMetersPerSecondSquared)
+                .setKinematics(DriveConstants.kDriveKinematics);
 
         // 2. Generate trajectory
         Trajectory trajectory = TrajectoryGenerator.generateTrajectory(
-                new Pose2d(0, 0, new Rotation2d(0)),
-                List.of(
-                        new Translation2d(1, 0),
-                        new Translation2d(1, -1)),
-                new Pose2d(2, -1, Rotation2d.fromDegrees(180)),
-                trajectoryConfig);
+            new Pose2d(0, 0, new Rotation2d(0)),
+            List.of(
+                new Translation2d(1, 0),
+                new Translation2d(1, -1)),
+            new Pose2d(2, -1, Rotation2d.fromDegrees(180)),
+            trajectoryConfig);
 
         // 3. Define PID controllers for tracking trajectory
         PIDController xController = new PIDController(AutoConstants.kPXController, 0, 0);
         PIDController yController = new PIDController(AutoConstants.kPYController, 0, 0);
         ProfiledPIDController thetaController = new ProfiledPIDController(
-                AutoConstants.kPThetaController, 0, 0, AutoConstants.kThetaControllerConstraints);
+            AutoConstants.kPThetaController, 0, 0, AutoConstants.kThetaControllerConstraints);
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
-// NEED TO FIX
+         
+        // NEED TO FIX
         // 4. Construct command to follow trajectory
         SwerveControllerCommand swerveControllerCommand = new SwerveControllerCommand(
-                trajectory,
-                swerveSubsystem::getPose,
-                DriveConstants.kDriveKinematics,
-                xController,
-                yController,
-                thetaController,
-                swerveSubsystem::setModuleStates,
-                swerveSubsystem);
+            trajectory,
+            swerveSubsystem::getPose,
+            DriveConstants.kDriveKinematics,
+            xController,
+            yController,
+            thetaController,
+            swerveSubsystem::setModuleStates,
+            swerveSubsystem);
 
         // 5. Add some init and wrap-up, and return everything
         return new SequentialCommandGroup(
-                new InstantCommand(() -> swerveSubsystem.resetOdometry(trajectory.getInitialPose())),
-                swerveControllerCommand,
-                new InstantCommand(() -> swerveSubsystem.stopModules()));
-
-                 */
-       //ADD ABOVE CODE FOR AUTONOMOUS END HERE  
-                 
+            new InstantCommand(() -> swerveSubsystem.resetOdometry(trajectory.getInitialPose())),
+            swerveControllerCommand,
+            new InstantCommand(() -> swerveSubsystem.stopModules()));
+        */
+       //ADD ABOVE CODE FOR AUTONOMOUS END HERE            
     }
 }
