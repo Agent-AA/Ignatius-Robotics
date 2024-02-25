@@ -17,6 +17,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 
 
@@ -66,8 +67,17 @@ public class SwerveSubsystem extends SubsystemBase {
     private final ADIS16448_IMU gyro = new ADIS16448_IMU();
 
 
-    //private final SwerveDriveOdometry odometer = new SwerveDriveOdometry(DriveConstants.kDriveKinematics,
-     //       new Rotation2d(0));
+  // Odometry class for tracking robot pose
+    SwerveDriveOdometry odometer =
+        new SwerveDriveOdometry(
+            DriveConstants.kDriveKinematics,
+            Rotation2d.fromDegrees(gyro.getAngle()), // Convert gyro degrees to Rotation2d
+            new SwerveModulePosition[] { // Getting distance & rotation2d from each swervemodule
+                frontLeft.getPosition(),
+                frontRight.getPosition(),
+                backLeft.getPosition(),
+                backRight.getPosition()
+            });
 
     public SwerveSubsystem() {
         new Thread(() -> {
@@ -90,15 +100,23 @@ public class SwerveSubsystem extends SubsystemBase {
     public Rotation2d getRotation2d() {
         return Rotation2d.fromDegrees(getHeading());
     }
-/* COMMENTED OUT ODOMETER CODE - NEED TO FIGURE OUT
+
+    // Fixed odometer issue so that I can use odometry with vision
     public Pose2d getPose() {
         return odometer.getPoseMeters();
     }
-
     public void resetOdometry(Pose2d pose) {
-        odometer.resetPosition(pose, getRotation2d());
+        odometer.resetPosition(
+            Rotation2d.fromDegrees(gyro.getAngle()), // Convert gyro degrees to Rotation2d
+            new SwerveModulePosition[] {
+              frontLeft.getPosition(),
+              frontRight.getPosition(),
+              backLeft.getPosition(),
+              backRight.getPosition()
+            },
+            pose);
     }
-*/
+
     @Override
     public void periodic() {
        // odometer.update(getRotation2d(), frontLeft.getState(), frontRight.getState(), backLeft.getState(),
@@ -117,13 +135,19 @@ public class SwerveSubsystem extends SubsystemBase {
         
     }
  
+  /**
+   * Sets the swerve ModuleStates.
+   *
+   * @param desiredStates The desired SwerveModule states.
+   */
     public void setModuleStates(SwerveModuleState[] desiredStates) {
        // SwerveDriveKinematics.normalizeWheelSpeeds(desiredStates, DriveConstants.kPhysicalMaxSpeedMetersPerSecond);   //MUST FIX!
+        SwerveDriveKinematics.desaturateWheelSpeeds(
+            desiredStates, DriveConstants.kPhysicalMaxSpeedMetersPerSecond); // Fixed
         frontLeft.setDesiredState(desiredStates[0]);
         frontRight.setDesiredState(desiredStates[1]);
         backLeft.setDesiredState(desiredStates[2]);
         backRight.setDesiredState(desiredStates[3]);
-         frontLeft.setDesiredState(desiredStates[0]);
     }
     
     public void drive(double xSpeed, double ySpeed, double rot, boolean fieldRelative) {

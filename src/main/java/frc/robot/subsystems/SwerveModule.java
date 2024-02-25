@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 //import edu.wpi.first.wpilibj.geometry.Rotation2d;
 //import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
@@ -78,9 +79,24 @@ public class SwerveModule {
         turningPidController.enableContinuousInput(-Math.PI, Math.PI);
 
         resetEncoders();
-            }
+    }
 
-            public double getDrivePosition() {
+  // Added getPosition function to enable odometry with vision
+    /**
+   * Returns the current position of the module.
+   *
+   * @return The current position of the module.
+   */
+  public SwerveModulePosition getPosition() {
+    return new SwerveModulePosition(
+        // WILL NEED TWEAKING: I attempted to replicate what getDistance() does on an AbsoluteEncoder
+        // for our RelativeEncoders
+        driveEncoder.getPosition() * ModuleConstants.kDriveEncoderRot2Meter,
+        new Rotation2d(turningEncoder.getPosition() * ModuleConstants.kTurningEncoderRot2Rad));
+        // NB: the rotation2d is not accurate, as I don't know the diameter of the turning encoder
+  }    
+    
+    public double getDrivePosition() {
         return driveEncoder.getPosition();
     }
 
