@@ -72,7 +72,7 @@ public class SwerveSubsystem extends SubsystemBase {
     private final ADIS16448_IMU gyro = new ADIS16448_IMU();
 
 
-  // Odometry class for tracking robot pose
+    // Odometry class for tracking robot pose
     SwerveDriveOdometry odometer =
         new SwerveDriveOdometry(
             DriveConstants.kDriveKinematics,
@@ -82,7 +82,7 @@ public class SwerveSubsystem extends SubsystemBase {
                 frontRight.getPosition(),
                 backLeft.getPosition(),
                 backRight.getPosition()
-            });
+            }); // May need to add a Pose2d for our starting pose
 
     public SwerveSubsystem() {
         new Thread(() -> {
@@ -128,24 +128,24 @@ public class SwerveSubsystem extends SubsystemBase {
     
     @Override
     public void periodic() {
-        // odometer.update(getRotation2d(), frontLeft.getState(), frontRight.getState(), backLeft.getState(), backRight.getState());
-        
-         //SmartDashboard.putString("Robot Location", getPose().getTranslation().toString());
-
-         SmartDashboard.putNumber("Robot Heading", Math.round(getHeading()));
-
-        
-         
+        // Update the odometry
+        odometer.update(
+            Rotation2d.fromDegrees(gyro.getAngle()),
+            new SwerveModulePosition[] {
+                frontLeft.getPosition(),
+                frontRight.getPosition(),
+                backLeft.getPosition(),
+                backRight.getPosition()
+            });
+        SmartDashboard.putNumber("Robot Heading", getHeading());
+        //SmartDashboard.putString("Robot Location", getPose().getTranslation().toString());
     }
-
-
 
     public void stopModules() {
         frontLeft.stop();
         frontRight.stop();
         backLeft.stop();
         backRight.stop();
-        
     }
  
   /**
@@ -154,7 +154,7 @@ public class SwerveSubsystem extends SubsystemBase {
    * @param desiredStates The desired SwerveModule states.
    */
     public void setModuleStates(SwerveModuleState[] desiredStates) {
-       // SwerveDriveKinematics.normalizeWheelSpeeds(desiredStates, DriveConstants.kPhysicalMaxSpeedMetersPerSecond);   //MUST FIX!
+        // SwerveDriveKinematics.normalizeWheelSpeeds(desiredStates, DriveConstants.kPhysicalMaxSpeedMetersPerSecond);   //MUST FIX!
         SwerveDriveKinematics.desaturateWheelSpeeds(
             desiredStates, DriveConstants.kPhysicalMaxSpeedMetersPerSecond); // Fixed
         frontLeft.setDesiredState(desiredStates[0]);
@@ -164,6 +164,8 @@ public class SwerveSubsystem extends SubsystemBase {
          frontLeft.setDesiredState(desiredStates[0]);
     }
     
+    // Custom drive function for lining up with limelight and for troubleshooting
+    // does what SwerveJoystickCmd does, but takes in a speed and not a speed supplier.
     public void drive(double xSpeed, double ySpeed, double rot, boolean fieldRelative) {
         var swerveModuleStates =
             DriveConstants.kDriveKinematics.toSwerveModuleStates(
@@ -173,11 +175,11 @@ public class SwerveSubsystem extends SubsystemBase {
                         xSpeed, ySpeed, rot, this.getRotation2d())
                     : new ChassisSpeeds(xSpeed, ySpeed, rot),
                 0.02)); // 0.02 = once per scheduler call
-    SwerveDriveKinematics.desaturateWheelSpeeds(
-        swerveModuleStates, DriveConstants.kTeleDriveMaxSpeedMetersPerSecond);
-    frontLeft.setDesiredState(swerveModuleStates[0]);
-    frontRight.setDesiredState(swerveModuleStates[1]);
-    backLeft.setDesiredState(swerveModuleStates[2]);
-    backRight.setDesiredState(swerveModuleStates[3]);
+        SwerveDriveKinematics.desaturateWheelSpeeds(
+            swerveModuleStates, DriveConstants.kTeleDriveMaxSpeedMetersPerSecond);
+        frontLeft.setDesiredState(swerveModuleStates[0]);
+        frontRight.setDesiredState(swerveModuleStates[1]);
+        backLeft.setDesiredState(swerveModuleStates[2]);
+        backRight.setDesiredState(swerveModuleStates[3]);
     }
 }
