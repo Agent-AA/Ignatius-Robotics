@@ -68,6 +68,7 @@ public class SwerveModule {
         driveEncoder = driveMotor.getEncoder();
         turningEncoder = turningMotor.getEncoder();
 
+        // Changes getPosition of relative encoder from # of rotations to distance
         driveEncoder.setPositionConversionFactor(ModuleConstants.kDriveEncoderRot2Meter);
         driveEncoder.setVelocityConversionFactor(ModuleConstants.kDriveEncoderRPM2MeterPerSec);
         turningEncoder.setPositionConversionFactor(ModuleConstants.kTurningEncoderRot2Rad);
@@ -81,20 +82,18 @@ public class SwerveModule {
         resetEncoders();
     }
 
-  // Added getPosition function to enable odometry with vision
+    // Added getPosition function to enable odometry with vision
     /**
-   * Returns the current position of the module.
-   *
-   * @return The current position of the module.
-   */
-  public SwerveModulePosition getPosition() {
-    return new SwerveModulePosition(
-        // WILL NEED TWEAKING: I attempted to replicate what getDistance() does on an AbsoluteEncoder
-        // for our RelativeEncoders
-        driveEncoder.getPosition() * ModuleConstants.kDriveEncoderRot2Meter,
-        new Rotation2d(turningEncoder.getPosition() * ModuleConstants.kTurningEncoderRot2Rad));
-        // NB: the rotation2d is not accurate, as I don't know the diameter of the turning encoder
-  }    
+    * Returns the current position of the module.
+    *
+    * @return The current position of the module.
+    */
+    public SwerveModulePosition getPosition() {
+        return new SwerveModulePosition(
+            // MAY NEED TWEAKING: constants of Rot2Meter and Rot2Rad may be inaccurate
+            driveEncoder.getPosition(),
+            new Rotation2d(turningEncoder.getPosition()));
+    }    
     
     public double getDrivePosition() {
         return driveEncoder.getPosition();
