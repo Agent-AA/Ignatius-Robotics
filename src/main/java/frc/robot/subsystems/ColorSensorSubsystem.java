@@ -13,23 +13,41 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-
+/**
+ * The Color Sensor Subsystem manage the color sensor mounted by in the note loading area.
+ * It is used to determine whether a note is loaded or not.
+ */
 public class ColorSensorSubsystem extends SubsystemBase {
 
   private final I2C.Port i2cPort = I2C.Port.kOnboard;
-
-
-  /**
-   * A Rev Color Sensor V3 object is constructed with an I2C port as a 
-   * parameter. The device will be automatically initialized with default 
-   * parameters.
-   */
   private final ColorSensorV3 m_colorSensor = new ColorSensorV3(i2cPort);
+  private double IR = m_colorSensor.getIR(); // infrared value
+  public Color detectedColor;
 
-  /** Creates a new ExampleSubsystem. */
   public ColorSensorSubsystem() {}
 
   /**
+     * The displayColors method will output the red, green, blue, IR, and proximity values
+     * of the color sensor to the SmartDashboard. It also prints the detectedColor (hexadecimal)
+     * to the dashboard.
+     */
+  public void displayColors() {
+
+    detectedColor = m_colorSensor.getColor();
+    int proximity = m_colorSensor.getProximity();
+
+
+    SmartDashboard.putNumber("Red", detectedColor.red);
+    SmartDashboard.putNumber("Green", detectedColor.green);
+    SmartDashboard.putNumber("Blue", detectedColor.blue);
+    SmartDashboard.putNumber("IR", IR);
+    SmartDashboard.putNumber("Proximity", proximity);
+
+
+    System.out.println(detectedColor);
+  }
+
+    /**
    * Example command factory method.
    *
    * @return a command
@@ -41,52 +59,6 @@ public class ColorSensorSubsystem extends SubsystemBase {
         () -> {
           /* one-time action goes here */
         });
-  }
-
-  public void displayColors() {
-    /**
-     * The method GetColor() returns a normalized color value from the sensor and can be
-     * useful if outputting the color to an RGB LED or similar. To
-     * read the raw color, use GetRawColor().
-     * 
-     * The color sensor works best when within a few inches from an object in
-     * well lit conditions (the built in LED is a big help here!). The farther
-     * an object is the more light from the surroundings will bleed into the 
-     * measurements and make it difficult to accurately determine its color.
-     */
-    /**
-     * The sensor returns a raw IR value of the infrared light detected.
-     */
-    double IR = m_colorSensor.getIR();
-
-    /**
-     * Open Smart Dashboard or Shuffleboard to see the color detected by the 
-     * sensor.
-     */
-
-    Color detectedColor = m_colorSensor.getColor();
-
-    SmartDashboard.putNumber("Red", detectedColor.red);
-    SmartDashboard.putNumber("Green", detectedColor.green);
-    SmartDashboard.putNumber("Blue", detectedColor.blue);
-    SmartDashboard.putNumber("IR", IR);
-
-    System.out.println(detectedColor);
-
-    /**
-     * In addition to RGB IR values, the color sensor can also return an 
-     * infrared proximity value. The chip contains an IR led which will emit
-     * IR pulses and measure the intensity of the return. When an object is 
-     * close the value of the proximity will be large (max 2047 with default
-     * settings) and will approach zero when the object is far away.
-     * 
-     * Proximity can be used to roughly approximate the distance of an object
-     * or provide a threshold for when an object is close enough to provide
-     * accurate color values.
-     */
-    int proximity = m_colorSensor.getProximity();
-
-    SmartDashboard.putNumber("Proximity", proximity);
   }
 
   /**
