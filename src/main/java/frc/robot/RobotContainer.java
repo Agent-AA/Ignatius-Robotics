@@ -28,6 +28,7 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
@@ -38,12 +39,15 @@ import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.OIConstants;
 import frc.robot.commands.Autos;
-import frc.robot.commands.ExampleCommand;
+import frc.robot.commands.ShootingIntakeCmd;
 import frc.robot.commands.SwerveJoystickCmd;
-import frc.robot.subsystems.ShootingSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
 
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;  //FOR FLIGHT STICK
+import frc.robot.subsystems.ShootingSubsystem;
+
+
+
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
  * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
@@ -53,22 +57,57 @@ import edu.wpi.first.wpilibj2.command.button.CommandJoystick;  //FOR FLIGHT STIC
 public class RobotContainer {
 
     private final SwerveSubsystem swerveSubsystem = new SwerveSubsystem();
+    private final ShootingSubsystem shootingSubsystem = new ShootingSubsystem();
+  //SWITCHING TO FLIGHTSTICK  CONTROLLER  
+//     private final Joystick driverJoytick = new Joystick(OIConstants.kDriverControllerPort); //0
+//     private final Joystick operatorJoytick = new Joystick(OIConstants.kOperatorControllerPort); //0
 
-    private final XboxController driverController = new XboxController(OIConstants.kDriverControllerPort); //0
-    private final XboxController operatorController = new XboxController(Constants.OperatorConstants.kOperatorControllerPort); //1
-
-    private final ShootingSubsystem m_shootingSubsystem = ShootingSubsystem.getInstance();
     //private final CommandJoystick commanddriverJoytick = new CommandJoystick(OIConstants.kDriverControllerPort);
+//SWITCHING TO XBOX CONTROLLER
+    private final XboxController xboxDriver = new XboxController(OIConstants.kDriverControllerPort);
+    private final XboxController xboxController = new XboxController(Constants.OperatorConstants.kOperatorControllerPort); //1
+    
+    //private final XboxController operatorController = new XboxController(Constants.OperatorConstants.kOperatorControllerPort); //1
+
+    //private final ShootingSubsystem m_shootingSubsystem = ShootingSubsystem.getInstance();
+
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Configure the trigger bindings
-    swerveSubsystem.setDefaultCommand(new SwerveJoystickCmd(
-                swerveSubsystem, 
-                () -> -driverController.getRawAxis(OIConstants.kDriverYAxis), //1
-                () -> driverController.getRawAxis(OIConstants.kDriverXAxis),  //0
-                () -> driverController.getRawAxis(OIConstants.kDriverRotAxis), //3
-                () -> !driverController.getRawButton(OIConstants.kDriverFieldOrientedButtonIdx)));
+    //HAD TO INVERT X AND Z AXIS TO GET TO DRIVE ROBOT
+    swerveSubsystem.setDefaultCommand(
+        
+                new SwerveJoystickCmd(
+                swerveSubsystem,
+                shootingSubsystem,
+    //SWITCHING TO FLIGHTSTICK  CONTROLLER            
+                // () -> -driverJoytick.getRawAxis(OIConstants.kDriverYAxis), //1
+                // () -> -driverJoytick.getRawAxis(OIConstants.kDriverXAxis),  //0  //Placed a negative in front of X axis to fix issue with going in opposite right / left direction
+                // () -> -operatorJoytick.getRawAxis(OIConstants.kDriverRotAxis), //3  CHANGE to 2nd JOYSTICK
+                // () -> !driverJoytick.getRawButton(OIConstants.kDriverFieldOrientedButtonIdx)));
+//SWITCHING TO XBOX CONTROLLER
+                () -> -xboxDriver.getRawAxis(OIConstants.kDriverYAxis), //1
+                () -> -xboxDriver.getRawAxis(OIConstants.kDriverXAxis),  //0  //Placed a negative in front of X axis to fix issue with going in opposite right / left direction
+                () -> -xboxDriver.getRawAxis(4), //4  CHANGE to 2nd JOYSTICK of Xbox Controller
+                () -> !xboxDriver.getRawButton(OIConstants.kDriverFieldOrientedButtonIdx),
+                () -> xboxDriver.getRawButton(2),
+                () -> xboxDriver.getRawButton(3),
+                () -> xboxDriver.getRawButton(4),  //ADDED FOR A BUTTON TO TURN 90 Degrees CW
+//ADDED 2ND XBOX CONTROLLER FOR OPERATOR CONTROLLER TO CONTROL INTAKE AND SHOOTER 
+
+                () -> xboxDriver.getRawButton(9),     // Added for Drive Turbo
+                
+                
+                () -> xboxController.getRawButton(4),  //XboxController #2 "Y" Button (#4) for SHOOTING AT SPEAKER
+                () -> xboxController.getRawButton(1),  //XboxController #2 "A" Button (#1) for SHOOTING AT AMP
+                () -> xboxController.getRawButton(5),
+                () -> xboxController.getRawButton(6)
+                ));  
+
+               
+
+                
 
         configureButtonBindings();
   }
@@ -89,17 +128,16 @@ public class RobotContainer {
     //This is supposed to set the 2nd joystick button on the main joystick
     //new JoystickButton(driverJoytick, 2).whenPressed(() -> swerveSubsystem.zeroHeading()); //ORIGINAL
     //new JoystickButton(driverJoytick, 2).whileTrue(getAutonomousCommand())(() -> swerveSubsystem.zeroHeading());
-    
-    Trigger leftBumper = new JoystickButton(operatorController, XboxController.Button.kLeftBumper.value)
-        .onTrue(m_shootingSubsystem.togglePriming(1));
 
-    Trigger rightBumper = new JoystickButton(operatorController, XboxController.Button.kLeftBumper.value)
-        .onTrue(m_shootingSubsystem.togglePriming(0));
+        // Trigger leftBumper = new JoystickButton(operatorController, XboxController.Button.kLeftBumper.value)
+        // .onTrue(m_shootingSubsystem.togglePriming(1));
 
-     Trigger aButton = new JoystickButton(operatorController, XboxController.Button.kA.value)
-        .onTrue(m_shootingSubsystem.shoot())
-        .onFalse(m_shootingSubsystem.unShoot());
+        // Trigger rightBumper = new JoystickButton(operatorController, XboxController.Button.kLeftBumper.value)
+        // .onTrue(m_shootingSubsystem.togglePriming(0));
 
+        // Trigger aButton = new JoystickButton(operatorController, XboxController.Button.kA.value)
+        // .onTrue(m_shootingSubsystem.shoot())
+        // .onFalse(m_shootingSubsystem.unShoot());
 }
 
   /**
@@ -108,17 +146,23 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-        
-    return(null);
+
+        // An example command will be run in autonomous
+        return(null); //MUST REMOVE THIS LINE ONCE AUTONOMOUS IS IN
+  
+    // BEN'S CODE:   
+    //return Commands.Run(() -> swerveSubsystem.setModuleStates({0.5,0.5,0.5,0.5,0.5}))
     
     //ADD BELOW CODE FOR AUTONOMOUS BEGIN HERE  
-    /* 
+ /* 
     
     // 1. Create trajectory settings
-        TrajectoryConfig trajectoryConfig = new TrajectoryConfig(
-                AutoConstants.kMaxSpeedMetersPerSecond,
-                AutoConstants.kMaxAccelerationMetersPerSecondSquared)
-                        .setKinematics(DriveConstants.kDriveKinematics);
+    TrajectoryConfig trajectoryConfig = new TrajectoryConfig(
+        AutoConstants.kMaxSpeedMetersPerSecond,
+        AutoConstants.kMaxAccelerationMetersPerSecondSquared)
+                .setKinematics(DriveConstants.kDriveKinematics);
+
+        //TrajectoryConfig trajectoryConfig = new TrajectoryConfig(1.25, 3);
 
         // 2. Generate trajectory
         Trajectory trajectory = TrajectoryGenerator.generateTrajectory(
@@ -153,8 +197,9 @@ public class RobotContainer {
                 swerveControllerCommand,
                 new InstantCommand(() -> swerveSubsystem.stopModules()));
 
-                 */
-       //ADD ABOVE CODE FOR AUTONOMOUS END HERE  
                  
+       //ADD ABOVE CODE FOR AUTONOMOUS END HERE  
+*/                  
     }
+  
 }

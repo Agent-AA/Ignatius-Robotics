@@ -12,21 +12,28 @@ import edu.wpi.first.wpilibj.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
 */
 
+import com.ctre.phoenix6.hardware.Pigeon2;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.Odometry;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-
-
+import edu.wpi.first.math.kinematics.WheelPositions;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.Constants.DriveConstants;
 
 public class SwerveSubsystem extends SubsystemBase {
-    private final SwerveModule frontLeft = new SwerveModule(
+    private final SwerveModule frontLeft = new SwerveModule( 
             DriveConstants.kFrontLeftDriveMotorPort,
             DriveConstants.kFrontLeftTurningMotorPort,
+           // DriveConstants.kFrontLeftdriveMotorReversed,   //EXPERIMENTAL
             DriveConstants.kFrontLeftDriveEncoderReversed,
             DriveConstants.kFrontLeftTurningEncoderReversed,
             DriveConstants.kFrontLeftDriveAbsoluteEncoderPort,
@@ -61,12 +68,25 @@ public class SwerveSubsystem extends SubsystemBase {
             DriveConstants.kBackRightDriveAbsoluteEncoderReversed);
 
    // private final AHRS gyro = new AHRS(SPI.Port.kMXP);  //REPLACED WITH ADIS16448_IMU see below
-    private final ADIS16448_IMU gyro = new ADIS16448_IMU();
+    //private final ADIS16448_IMU ADISgyro = new ADIS16448_IMU();
+    //private final double moduleDistance = Math.sqrt(Math.pow(DriveConstants.kWheelBase / 2, 2) + Math.pow(DriveConstants.kTrackWidth / 2, 2));
+    //private final SwerveDriveOdometry odometer = new SwerveDriveOdometry(
+        // DriveConstants.kDriveKinematics, 
+        // getRotation2d(), 
+        // new SwerveModulePosition[] {
+        //     new SwerveModulePosition(moduleDistance, frontLeft.getState().angle),
+        //     new SwerveModulePosition(moduleDistance, frontRight.getState().angle),
+        //     new SwerveModulePosition(moduleDistance, backLeft.getState().angle),
+        //     new SwerveModulePosition(moduleDistance, backRight.getState().angle)
+        // });
+Pigeon2 P2gyro = new Pigeon2(20);  //Using CANID #20
+// public void zeroHeading() {
+//   p2gyro.reset();
+// }
 
-
-    //private final SwerveDriveOdometry odometer = new SwerveDriveOdometry(DriveConstants.kDriveKinematics,
-     //       new Rotation2d(0));
-
+// public double getHeading() {
+//   return Math.IEEEremainder(p2gyro.getAngle(), 360);
+// }
     public SwerveSubsystem() {
         new Thread(() -> {
             try {
@@ -78,31 +98,41 @@ public class SwerveSubsystem extends SubsystemBase {
     }
 
     public void zeroHeading() {
-        gyro.reset();
+        P2gyro.reset();
     }
 
     public double getHeading() {
-        return Math.IEEEremainder(gyro.getAngle(), 360);
+        return -Math.IEEEremainder(P2gyro.getAngle(), 360);  //Placed Negative since Pigeon2 is CCW+ and WPLIB assumes Gyros are CW+
+        //FROM CHIEF DELPHI POST  "At headings of 0 and 180 degrees, everything functioned as expected (i.e. up on the joystick was field-forward, left on joystick was field-left, etc.) but at 90 and 270 degree headings things seemed to get inverted (joystick-left was field-right, joystick-up was field-down)."
     }
 
     public Rotation2d getRotation2d() {
         return Rotation2d.fromDegrees(getHeading());
     }
-/* COMMENTED OUT ODOMETER CODE - NEED TO FIGURE OUT
+
+/*
+    //COMMENTED OUT ODOMETER CODE - NEED TO FIGURE OUT
     public Pose2d getPose() {
         return odometer.getPoseMeters();
     }
+///NEED TO RESOLVE ERROR:  ﻿4:47:45.252 PM
+// Error at frc.robot.subsystems.SwerveSubsystem.resetOdometry(SwerveSubsystem.java:105): Unhandled exception: java.lang.IllegalArgumentException: Number of modules is not consistent with number of wheel locations provided in constructor ERROR  1  Unhandled exception: java.lang.IllegalArgumentException: Number of modules is not consistent with number of wheel locations provided in constructor  frc.robot.subsystems.SwerveSubsystem.resetOdometry(SwerveSubsystem.java:105) 
 
     public void resetOdometry(Pose2d pose) {
-        odometer.resetPosition(pose, getRotation2d());
+        odometer.resetPosition(getRotation2d(), new SwerveModulePosition[0], pose);
     }
-*/
+
+    */
     @Override
     public void periodic() {
-       // odometer.update(getRotation2d(), frontLeft.getState(), frontRight.getState(), backLeft.getState(),
-         //       backRight.getState());
-        SmartDashboard.putNumber("Robot Heading", getHeading());
-        //SmartDashboard.putString("Robot Location", getPose().getTranslation().toString());
+        // odometer.update(getRotation2d(), frontLeft.getState(), frontRight.getState(), backLeft.getState(), backRight.getState());
+        
+         //SmartDashboard.putString("Robot Location", getPose().getTranslation().toString());
+
+         SmartDashboard.putNumber("Robot Heading", Math.round(getHeading()));
+
+        
+         
     }
 
 
@@ -114,14 +144,40 @@ public class SwerveSubsystem extends SubsystemBase {
         backRight.stop();
         
     }
- 
+ //Sets each of the SwerveModules (FL,FR,BL,BR) to appropriate SwerveModule State
     public void setModuleStates(SwerveModuleState[] desiredStates) {
-       // SwerveDriveKinematics.normalizeWheelSpeeds(desiredStates, DriveConstants.kPhysicalMaxSpeedMetersPerSecond);   //MUST FIX!
+        SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, DriveConstants.kPhysicalMaxSpeedMetersPerSecond);   
+        //Above changed from:  SwerveDriveKinematics.normalizeWheelSpeeds(desiredStates, DriveConstants.kPhysicalMaxSpeedMetersPerSecond);
         frontLeft.setDesiredState(desiredStates[0]);
         frontRight.setDesiredState(desiredStates[1]);
         backLeft.setDesiredState(desiredStates[2]);
         backRight.setDesiredState(desiredStates[3]);
-         frontLeft.setDesiredState(desiredStates[0]);
-    }
+         //frontLeft.setDesiredState(desiredStates[0]);  //not sure why there's a 2nd line of this same code?
+
+        //USE THIS CODE TO MAYBE MANUALLY SET SPEED AND TURN TO EACH SWERVE DRIVE?
+
+        // Example chassis speeds: 1 meter per second forward, 3 meters
+// per second to the left, and rotation at 1.5 radians per second
+// counterclockwise.
+
+    // }
+    //  public void setModuleStates2(SwerveModuleState[] desiredStates) {
+
+    //         ChassisSpeeds speeds = new ChassisSpeeds(1.0, 3.0, 1.5);
+
+    //         // Convert to module states
+    //         SwerveModuleState[] moduleStates = Constants.DriveConstants.kDriveKinematics.toSwerveModuleStates(speeds);
+    //         // Front left module state
+    //         SwerveModuleState swervemodulefrontLeft2 = moduleStates[0];
+    //         // Front right module state
+    //         SwerveModuleState swervemodulefrontRight2 = moduleStates[1];
+    //         // Back left module state
+    //         SwerveModuleState swervemodulebackLeft2 = moduleStates[2];
+    //         // Back right module state
+    //         SwerveModuleState swervemodulebackRight2 = moduleStates[3];
+
+    //    // swervemodulefrontLeft2.angle;
+
+     }
     
 }
