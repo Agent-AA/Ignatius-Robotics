@@ -161,6 +161,8 @@ public class Robot extends TimedRobot {
     // block in order for anything in the Command-based framework to work.
     CommandScheduler.getInstance().run();
 
+    RobotContainer.colorSensorSubsystem.displayColors();
+
 
 /*BEGIN Drive and Turning Motor Encoder FEEDBACK CODE */
 // FLdriveMotor.setInverted(Constants.DriveConstants.kFrontLeftDriveEncoderReversed);

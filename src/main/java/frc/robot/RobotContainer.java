@@ -44,6 +44,7 @@ import frc.robot.commands.SwerveJoystickCmd;
 import frc.robot.subsystems.SwerveSubsystem;
 
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;  //FOR FLIGHT STICK
+import frc.robot.subsystems.ColorSensorSubsystem;
 import frc.robot.subsystems.ShootingSubsystem;
 
 
@@ -58,6 +59,8 @@ public class RobotContainer {
 
     private final SwerveSubsystem swerveSubsystem = new SwerveSubsystem();
     private final ShootingSubsystem shootingSubsystem = new ShootingSubsystem();
+    public final static ColorSensorSubsystem colorSensorSubsystem = new ColorSensorSubsystem();
+
   //SWITCHING TO FLIGHTSTICK  CONTROLLER  
 //     private final Joystick driverJoytick = new Joystick(OIConstants.kDriverControllerPort); //0
 //     private final Joystick operatorJoytick = new Joystick(OIConstants.kOperatorControllerPort); //0
