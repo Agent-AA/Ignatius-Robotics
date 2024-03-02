@@ -4,8 +4,6 @@
 
 package frc.robot;
 
-import java.util.List;
-import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 
 //   REPLACED BY ALTERNATE IMPORTS (SEE BELOW)
@@ -18,32 +16,14 @@ import edu.wpi.first.wpilibj.XboxController;
 //import edu.wpi.first.wpilibj.trajectory.TrajectoryConfig;
 //import edu.wpi.first.wpilibj.trajectory.TrajectoryGenerator;
 
-import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.trajectory.Trajectory;
-import edu.wpi.first.math.trajectory.TrajectoryConfig;
-import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.Constants.AutoConstants;
-import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.OIConstants;
-import frc.robot.commands.Autos;
-import frc.robot.commands.ShootingIntakeCmd;
 import frc.robot.commands.SwerveJoystickCmd;
 import frc.robot.subsystems.SwerveSubsystem;
 
-import edu.wpi.first.wpilibj2.command.button.CommandJoystick;  //FOR FLIGHT STICK
 import frc.robot.subsystems.ColorSensorSubsystem;
 import frc.robot.subsystems.ShootingSubsystem;
 

@@ -1,9 +1,7 @@
 package frc.robot.subsystems;
 
 //import com.kauailabs.navx.frc.AHRS;  Using Analog Devices ADIS16448 Gyro instead (see below)
-import edu.wpi.first.wpilibj.ADIS16448_IMU;
 
-import edu.wpi.first.wpilibj.SPI;
 /*   REPLACED BY ALTERNATE IMPORTS (SEE BELOW)
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
@@ -14,19 +12,11 @@ import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
 
 import com.ctre.phoenix6.hardware.Pigeon2;
 
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.Odometry;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
-import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.math.kinematics.WheelPositions;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
 import frc.robot.Constants.DriveConstants;
 
 public class SwerveSubsystem extends SubsystemBase {
