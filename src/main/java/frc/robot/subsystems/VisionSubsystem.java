@@ -15,64 +15,40 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 
 //import frc.robot.ShuffleboardInfo;
 
-public class VisionSubsystem extends SubsystemBase {
-  private final NetworkTable m_limelightTable;
-  private double tv, tx, ta;
-  private ArrayList<Double> m_targetList;
-  private final int MAX_ENTRIES = 50;
-  //private final NetworkTableEntry m_isTargetValid, m_led_entry;
-
-
-  /**
-   * Creates a new Vision.
-   */
-  public VisionSubsystem() {
-    m_limelightTable = NetworkTableInstance.getDefault().getTable("limelight");
-    m_targetList = new ArrayList<Double>(MAX_ENTRIES);
-    //m_isTargetValid = ShuffleboardInfo.getInstance().getTargetEntry();
-    //m_led_entry = m_limelightTable.getEntry("ledMode");
-  }
-  @Override
-  public void periodic() {
-    // This method will be called once per scheduler run
-
-    // This method will be called once per scheduler run
-    tv = m_limelightTable.getEntry("tv").getDouble(0);
-    tx = m_limelightTable.getEntry("tx").getDouble(0);
-    ta = m_limelightTable.getEntry("ta").getDouble(0);
-
-    //m_isTargetValid.forceSetBoolean(isTargetValid());
-
-    if (m_targetList.size() >= MAX_ENTRIES) {
-      m_targetList.remove(0);
+public class VisionSubsystem extends SubsystemBase {  
+    
+    NetworkTable m_limelightTable;
+    NetworkTableEntry tv, tx, ty, ta;
+    public static double nt_xOffset, nt_yOffset, nt_area;
+    public static boolean nt_visibility;
+    
+    public VisionSubsystem() {
+        NetworkTable m_limelightTable = NetworkTableInstance.getDefault().getTable("limelight");
+        NetworkTableInstance.getDefault().startServer();
+        NetworkTableInstance.getDefault().setServerTeam(5409);   
+        
+        tv = m_limelightTable.getEntry("tv");
+        tx = m_limelightTable.getEntry("tx");
+        ty = m_limelightTable.getEntry("ty");
+        ta = m_limelightTable.getEntry("ta");
     }
-    m_targetList.add(ta);
-  }
 
-  public double getTX() {
-    return tx;
-  }
-
-  public double getTA() {
-    double sum = 0;
-
-    for (Double num : m_targetList) { 		      
-      sum += num.doubleValue();
+    @Override
+    public void periodic() {
+        updateAprilPose();
+    }     
+    public void updateAprilPose() {
+        // Read values
+        nt_visibility = tv.getBoolean(false);
+        nt_xOffset = tx.getDouble(0.0);
+        nt_yOffset = ty.getDouble(0.0);
+        nt_area = ta.getDouble(0.0);
+        
+        // Post to smart dashboard
+        SmartDashboard.putBoolean("LimelightTargeting?", nt_visibility);
+        SmartDashboard.putNumber("LimelightX", nt_xOffset);
+        SmartDashboard.putNumber("LimelightY", nt_yOffset);
+        SmartDashboard.putNumber("LimelightArea", nt_area);
     }
-    return sum/m_targetList.size();
-  }
 
-  public boolean isTargetValid() {
-    return (tv == 1.0); 
-  }
-
-  public void setLlLedMode(int mode){
-    //m_led_entry.forceSetDouble((mode));
-  }
-  
-
-  @Override
-  public void simulationPeriodic() {
-    // This method will be called once per scheduler run during simulation
-  }
 }
