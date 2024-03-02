@@ -108,6 +108,7 @@ public class RobotContainer {
     * @return the command to run in autonomous
     */
     public Command getAutonomousCommand() {
+        // Trouble shooting code: drives forward
         return(new RunCommand(() -> swerveSubsystem.drive(0, 1, 0, false)));
         
         //ADD BELOW CODE FOR AUTONOMOUS BEGIN HERE  

@@ -8,29 +8,38 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 
 public class VisionSubsystem extends SubsystemBase {  
     
-    public static double x, y, area;
-    public static boolean v;
+    NetworkTable m_limelightTable;
+    NetworkTableEntry tv, tx, ty, ta;
+    public static double nt_xOffset, nt_yOffset, nt_area;
+    public static boolean nt_visibility;
     
-    public VisionSubsystem() {}
+    public VisionSubsystem() {
+        NetworkTable m_limelightTable = NetworkTableInstance.getDefault().getTable("limelight");
+        NetworkTableInstance.getDefault().startServer();
+        NetworkTableInstance.getDefault().setServerTeam(5409);   
+        
+        tv = m_limelightTable.getEntry("tv");
+        tx = m_limelightTable.getEntry("tx");
+        ty = m_limelightTable.getEntry("ty");
+        ta = m_limelightTable.getEntry("ta");
+    }
 
     @Override
     public void periodic() {
-        NetworkTable m_limelightTable = NetworkTableInstance.getDefault().getTable("limelight");
-        NetworkTableEntry tv = m_limelightTable.getEntry("tv");
-        NetworkTableEntry tx = m_limelightTable.getEntry("tx");
-        NetworkTableEntry ty = m_limelightTable.getEntry("ty");
-        NetworkTableEntry ta = m_limelightTable.getEntry("ta");
-        
+        updateAprilPose();
+    }     
+    public void updateAprilPose() {
         // Read values
-        v = tv.getBoolean(false);
-        x = tx.getDouble(0.0);
-        y = ty.getDouble(0.0);
-        area = ta.getDouble(0.0);
+        nt_visibility = tv.getBoolean(false);
+        nt_xOffset = tx.getDouble(0.0);
+        nt_yOffset = ty.getDouble(0.0);
+        nt_area = ta.getDouble(0.0);
         
         // Post to smart dashboard
-        SmartDashboard.putBoolean("LimelightTargeting?", v);
-        SmartDashboard.putNumber("LimelightX", x);
-        SmartDashboard.putNumber("LimelightY", y);
-        SmartDashboard.putNumber("LimelightArea", area);
-    }     
+        SmartDashboard.putBoolean("LimelightTargeting?", nt_visibility);
+        SmartDashboard.putNumber("LimelightX", nt_xOffset);
+        SmartDashboard.putNumber("LimelightY", nt_yOffset);
+        SmartDashboard.putNumber("LimelightArea", nt_area);
+    }
+
 }
