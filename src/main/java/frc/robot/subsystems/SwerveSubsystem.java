@@ -22,6 +22,7 @@ import edu.wpi.first.math.kinematics.Odometry;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.kinematics.WheelPositions;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -83,6 +84,17 @@ public class SwerveSubsystem extends SubsystemBase {
                 backLeft.getPosition(),
                 backRight.getPosition()
             }); // May need to add a Pose2d for our starting pose
+    // Odometry class for tracking robot pose
+    SwerveDriveOdometry odometer =
+        new SwerveDriveOdometry(
+            DriveConstants.kDriveKinematics,
+            Rotation2d.fromDegrees(gyro.getAngle()), // Convert gyro degrees to Rotation2d
+            new SwerveModulePosition[] { // Getting distance & rotation2d from each swervemodule
+                frontLeft.getPosition(),
+                frontRight.getPosition(),
+                backLeft.getPosition(),
+                backRight.getPosition()
+            }); // May need to add a Pose2d for our starting pose
 
     public SwerveSubsystem() {
         new Thread(() -> {
@@ -106,7 +118,8 @@ public class SwerveSubsystem extends SubsystemBase {
     public Rotation2d getRotation2d() {
         return Rotation2d.fromDegrees(getHeading());
     }
-/* COMMENTED OUT ODOMETER CODE - NEED TO FIGURE OUT
+
+    // Fixed odometer issue so that I can use odometry with vision
     public Pose2d getPose() {
         return odometer.getPoseMeters();
     }
@@ -123,11 +136,29 @@ public class SwerveSubsystem extends SubsystemBase {
               backRight.getPosition()
             },
             pose);
+        odometer.resetPosition(
+            Rotation2d.fromDegrees(gyro.getAngle()), // Convert gyro degrees to Rotation2d
+            new SwerveModulePosition[] {
+              frontLeft.getPosition(),
+              frontRight.getPosition(),
+              backLeft.getPosition(),
+              backRight.getPosition()
+            },
+            pose);
     }
 
     
     @Override
     public void periodic() {
+        // Update the odometry
+        odometer.update(
+            Rotation2d.fromDegrees(gyro.getAngle()),
+            new SwerveModulePosition[] {
+                frontLeft.getPosition(),
+                frontRight.getPosition(),
+                backLeft.getPosition(),
+                backRight.getPosition()
+            });
         // Update the odometry
         odometer.update(
             Rotation2d.fromDegrees(gyro.getAngle()),
@@ -153,7 +184,15 @@ public class SwerveSubsystem extends SubsystemBase {
    *
    * @param desiredStates The desired SwerveModule states.
    */
+  /**
+   * Sets the swerve ModuleStates.
+   *
+   * @param desiredStates The desired SwerveModule states.
+   */
     public void setModuleStates(SwerveModuleState[] desiredStates) {
+        // SwerveDriveKinematics.normalizeWheelSpeeds(desiredStates, DriveConstants.kPhysicalMaxSpeedMetersPerSecond);   //MUST FIX!
+        SwerveDriveKinematics.desaturateWheelSpeeds(
+            desiredStates, DriveConstants.kPhysicalMaxSpeedMetersPerSecond); // Fixed
         // SwerveDriveKinematics.normalizeWheelSpeeds(desiredStates, DriveConstants.kPhysicalMaxSpeedMetersPerSecond);   //MUST FIX!
         SwerveDriveKinematics.desaturateWheelSpeeds(
             desiredStates, DriveConstants.kPhysicalMaxSpeedMetersPerSecond); // Fixed
@@ -161,9 +200,10 @@ public class SwerveSubsystem extends SubsystemBase {
         frontRight.setDesiredState(desiredStates[1]);
         backLeft.setDesiredState(desiredStates[2]);
         backRight.setDesiredState(desiredStates[3]);
-         frontLeft.setDesiredState(desiredStates[0]);
     }
     
+    // Custom drive function for lining up with limelight and for troubleshooting
+    // does what SwerveJoystickCmd does, but takes in a speed and not a speed supplier.
     // Custom drive function for lining up with limelight and for troubleshooting
     // does what SwerveJoystickCmd does, but takes in a speed and not a speed supplier.
     public void drive(double xSpeed, double ySpeed, double rot, boolean fieldRelative) {
@@ -175,6 +215,12 @@ public class SwerveSubsystem extends SubsystemBase {
                         xSpeed, ySpeed, rot, this.getRotation2d())
                     : new ChassisSpeeds(xSpeed, ySpeed, rot),
                 0.02)); // 0.02 = once per scheduler call
+        SwerveDriveKinematics.desaturateWheelSpeeds(
+            swerveModuleStates, DriveConstants.kTeleDriveMaxSpeedMetersPerSecond);
+        frontLeft.setDesiredState(swerveModuleStates[0]);
+        frontRight.setDesiredState(swerveModuleStates[1]);
+        backLeft.setDesiredState(swerveModuleStates[2]);
+        backRight.setDesiredState(swerveModuleStates[3]);
         SwerveDriveKinematics.desaturateWheelSpeeds(
             swerveModuleStates, DriveConstants.kTeleDriveMaxSpeedMetersPerSecond);
         frontLeft.setDesiredState(swerveModuleStates[0]);
